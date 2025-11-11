@@ -1,58 +1,40 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const path = require("path");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-// Serve les fichiers du dossier "public"
-app.use(express.static(path.join(__dirname, "public")));
+app.use(cors({
+  origin: "*", // autorise tout (pour tester)
+  methods: ["GET", "POST"]
+}));
 
-let time = 0;
-let interval = null;
+const io = new Server(server, {
+  cors: {
+    origin: "*", // autorise toutes les origines (à restreindre plus tard si besoin)
+    methods: ["GET", "POST"]
+  }
+});
 
-// Quand un client se connecte (display ou controller)
 io.on("connection", (socket) => {
-  console.log("Un client est connecté :", socket.id);
-
-  // Envoie le temps actuel à la nouvelle connexion
-  socket.emit("timeUpdate", time);
-
-  // Démarrer le timer
+  console.log("Un client est connecté");
+  
   socket.on("start", () => {
-    if (!interval) {
-      interval = setInterval(() => {
-        time++;
-        io.emit("timeUpdate", time);
-      }, 1000);
-      console.log("⏱️ Timer démarré");
-    }
+    console.log("Commande de démarrage reçue");
+    io.emit("start"); // envoie à tous les clients
   });
 
-  // Arrêter le timer
-  socket.on("stop", () => {
-    clearInterval(interval);
-    interval = null;
-    console.log("⏸️ Timer arrêté");
+  socket.on("pause", () => {
+    console.log("Commande de pause reçue");
+    io.emit("pause");
   });
 
-  // Remettre à zéro le timer
   socket.on("reset", () => {
-    time = 0;
-    io.emit("timeUpdate", time);
-    console.log("🔄 Timer remis à zéro");
-  });
-
-  // Déconnexion
-  socket.on("disconnect", () => {
-    console.log("Client déconnecté :", socket.id);
+    console.log("Commande de reset reçue");
+    io.emit("reset");
   });
 });
 
-// Utilise le port Render ou 10000 localement
-const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => {
-  console.log(`✅ Serveur démarré sur le port ${PORT}`);
-});
+server.listen(10000, () => console.log("Serveur sur le port 10000"));
