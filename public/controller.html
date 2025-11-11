@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contrôleur du Minuteur</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background: #f4f4f4;
+    }
+
+    button {
+      font-size: 20px;
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Contrôle du Minuteur</h1>
+
+  <button id="start">Démarrer</button>
+  <button id="stop">Arrêter</button>
+  <button id="reset">Remettre à zéro</button>
+
+  <!-- Connexion Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const startBtn = document.getElementById("start");
+    const stopBtn = document.getElementById("stop");
+    const resetBtn = document.getElementById("reset");
+
+    startBtn.onclick = () => {
+      socket.emit("start");
+    };
+
+    stopBtn.onclick = () => {
+      socket.emit("stop");
+    };
+
+    resetBtn.onclick = () => {
+      socket.emit("reset");
+    };
+  </script>
+</body>
+</html>
